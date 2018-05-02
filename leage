@@ -1,0 +1,53 @@
+import http.client
+import json
+import numpy as np
+import json
+import csv
+from urllib.request import Request, urlopen
+import pathlib
+
+def read_csv(location):
+    filename = location
+    my_list = []
+    with open(filename, 'r') as dataset:
+        reader = csv.reader(dataset, delimiter=',')#convert string from csv file to float in list.
+        my_list = list(reader)
+    data = np.array(my_list)
+    return data
+
+def dump(numb):
+    connection = http.client.HTTPConnection('api.football-data.org')
+    headers = { 'X-Auth-Token': 'e4d918e0395349ae972d1e306045e324', 'X-Response-Control': 'minified' }
+    connection.request('GET', '/v1/competitions/'+numb+'/teams', None, headers )
+    jsonfile = json.loads(connection.getresponse().read().decode())
+
+    with open('C:/Users/NUMMPETCH/Desktop/66.json', mode='w', encoding='utf-8') as f:
+        json.dump(jsonfile, f,indent=4)
+
+    array_data = np.empty((0,5), str)
+    with open('C:/Users/NUMMPETCH/Desktop/66.json', 'r',encoding="utf-8") as f:
+        d = json.load(f)
+        for x in range(len(d['teams'])):
+            dat = []
+            dat.append(d['teams'][x]['id'])
+            dat.append(d['teams'][x]['name'])
+            dat.append(d['teams'][x]['shortName'])
+            dat.append(d['teams'][x]['squadMarketValue'])
+            dat.append(d['teams'][x]['crestUrl'])
+            array_data = np.concatenate((array_data, [dat]), axis=0)
+
+    with open('C:/Users/NUMMPETCH/Desktop/data_p/2017/team_leage/'+numb+'/'+numb+'.csv',"w+",encoding='utf-8') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(array_data)   
+
+
+number_file="425"   
+data=read_csv("C:/Users/NUMMPETCH/Desktop/data_p/2017/2017.csv")
+ 
+for i in range(len(data)):
+    if (i%2==0):
+        number=(data[i][0])
+        print(number)
+        pathlib.Path('C:/Users/NUMMPETCH/Desktop/data_p/2017/team_leage/'+number).mkdir(parents=True, exist_ok=True) 
+        dump(number)
+print("finished")
