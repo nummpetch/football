@@ -1,0 +1,35 @@
+import http.client
+import json
+import numpy as np
+import json
+import csv
+from urllib.request import Request, urlopen
+
+numb="560"
+connection = http.client.HTTPConnection('api.football-data.org')
+headers = { 'X-Auth-Token': 'e4d918e0395349ae972d1e306045e324', 'X-Response-Control': 'minified' }
+connection.request('GET', '/v1/competitions/?season=2017', None, headers )
+jsonfile = json.loads(connection.getresponse().read().decode())
+
+with open('C:/Users/NUMMPETCH/Desktop/66.json', mode='w', encoding='utf-8') as f:
+    json.dump(jsonfile, f,indent=4)
+
+array_data = np.empty((0,7), str)
+with open('C:/Users/NUMMPETCH/Desktop/66.json', 'r') as f:
+    d = json.load(f)
+    for x in range(len(d)):
+        dat = []
+        dat.append(d[x]['id'])
+        dat.append(d[x]['caption'])
+        dat.append(d[x]['league'])
+        dat.append(d[x]['year'])
+        dat.append(d[x]['numberOfTeams'])
+        dat.append(d[x]['numberOfGames'])
+        dat.append(d[x]['lastUpdated'])
+        array_data = np.concatenate((array_data, [dat]), axis=0)
+
+with open('C:/Users/NUMMPETCH/Desktop/data_p/2017.csv',"w+") as my_csv:
+    csvWriter = csv.writer(my_csv,delimiter=',')
+    csvWriter.writerows(array_data)   
+    
+print("done")
