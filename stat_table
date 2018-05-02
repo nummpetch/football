@@ -1,0 +1,62 @@
+import http.client
+import json
+import numpy as np
+import json
+import csv
+from urllib.request import Request, urlopen
+import pathlib
+from time import sleep
+
+def read_csv(location):
+    filename = location
+    my_list = []
+    with open(filename, 'r') as dataset:
+        reader = csv.reader(dataset, delimiter=',')#convert string from csv file to float in list.
+        my_list = list(reader)
+    data = np.array(my_list)
+    return data
+
+def dump(numb):
+    connection = http.client.HTTPConnection('api.football-data.org')
+    headers = { 'X-Auth-Token': 'e4d918e0395349ae972d1e306045e324', 'X-Response-Control': 'minified' }
+    connection.request('GET', '/v1/teams/'+numb+'/players', None, headers )
+    jsonfile = json.loads(connection.getresponse().read().decode())
+    sleep(0.1)
+    with open('C:/Users/NUMMPETCH/Desktop/66.json', mode='w', encoding='utf-8') as f:
+        json.dump(jsonfile, f,indent=4)
+    sleep(0.1)    
+    array_data = np.empty((0,5), str)
+    with open('C:/Users/NUMMPETCH/Desktop/66.json', 'r') as f:
+        sleep(0.2)
+        d = json.load(f)
+        for x in range(len(d['players'])):
+            dat = []
+            dat.append(d['players'][x]['name'])
+            dat.append(d['players'][x]['position'])
+            dat.append(d['players'][x]['jerseyNumber'])
+            dat.append(d['players'][x]['dateOfBirth'])
+            dat.append(d['players'][x]['nationality'])
+            array_data = np.concatenate((array_data, [dat]), axis=0)
+    sleep(0.1)
+    with open('C:/Users/NUMMPETCH/Desktop/data_p/2017/team_leage/'+number_file+'/player_team/'+numb+'.csv',"w+") as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(array_data)   
+
+    print("done")
+
+number_file="425"   
+data=read_csv("C:/Users/NUMMPETCH/Desktop/data_p/2015/2015.csv")
+ 
+for i in range(len(data)):
+    if (i%2==0):
+        number_file=(data[i][0])
+        n_data=read_csv("C:/Users/NUMMPETCH/Desktop/data_p/2017/team_leage/"+number_file+"/"+number_file+".csv")
+        print("number_file="+number_file)
+        for j in range(len(n_data)):
+            if (j%2==0):
+                number=(n_data[j][0])
+                pathlib.Path('C:/Users/NUMMPETCH/Desktop/data_p/2017/team_leage/'+number_file+'/player_team').mkdir(parents=True, exist_ok=True)  
+                print(number)
+                dump(number)
+                sleep(0.1)
+print("finished")
